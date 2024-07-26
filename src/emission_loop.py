@@ -72,7 +72,7 @@ def time_converter_en(times):
             time_mes = f'in {pluralize_noun_en(times // 3600, "hour")}'
     return time_mes
 
-
+#
 def make_message(region, group, emission_time):
     emission_time = int(emission_time)
     damage_phase = 120

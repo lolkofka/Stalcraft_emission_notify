@@ -20,6 +20,7 @@ groups = {
     'EU': '@stalcraftemissions_eu',
     'RU': '@stalcraftvibrosi',
 }
+emission_end_time = 225
 
 
 def pluralize_noun_en(number, word):
@@ -76,7 +77,7 @@ def time_converter_en(times):
 def make_message(region, group, emission_time):
     emission_time = int(emission_time)
     damage_phase = 120
-    safaty_phase = 225
+    safaty_phase = emission_end_time
     actual_time = int(time.time())
     passed_time = actual_time - emission_time
     
@@ -84,7 +85,7 @@ def make_message(region, group, emission_time):
     safaty_time = passed_time - safaty_phase
     
     if region == 'RU':
-        if passed_time < 225:
+        if passed_time < emission_end_time:
             message = f'''
 <b>💥 Выброс начался!</b>
 
@@ -99,15 +100,15 @@ t.me/{group[1:]}
             message = f'''
 <b>💥 Выброс!</b>
 
-<b>Закончился: </b>{time_converter_ru(passed_time - 225)}
-{spawn_boost_mes if (passed_time-225)<60*30 else ''}
+<b>Закончился: </b>{time_converter_ru(passed_time - emission_end_time)}
+{spawn_boost_mes if (passed_time-emission_end_time)<60*30 else ''}
 t.me/{group[1:]}
 '''
     
     
     
     else:
-        if passed_time < 225:
+        if passed_time < emission_end_time:
             message = f'''
 <b>💥 An Eruption occurred!</b>
 
@@ -122,8 +123,8 @@ t.me/{group[1:]}
             message = f'''
 <b>💥 Eruption!</b>
 
-<b>End time: </b>{time_converter_en(passed_time - 225)}
-{spawn_boost_mes if (passed_time-225)<60*30 else ''}
+<b>End time: </b>{time_converter_en(passed_time - emission_end_time)}
+{spawn_boost_mes if (passed_time-emission_end_time)<60*30 else ''}
 t.me/{group[1:]}
 '''
     return message

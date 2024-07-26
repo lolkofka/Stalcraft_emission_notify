@@ -1,0 +1,15 @@
+{
+    "bot": {
+        "token": "",
+        "database": "",
+        "managers": [
+            1234567890
+        ],
+        "debug": true,
+        "mongo": ""
+    },
+    "stalcraft_api": {
+        "client_id": 123,
+        "client_secret": "aboba"
+    }
+}

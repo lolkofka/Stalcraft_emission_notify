@@ -76,7 +76,7 @@ def time_converter_en(times):
 def make_message(region, group, emission_time):
     emission_time = int(emission_time)
     damage_phase = 120
-    safaty_phase = 240
+    safaty_phase = 225
     actual_time = int(time.time())
     passed_time = actual_time - emission_time
     
@@ -84,7 +84,7 @@ def make_message(region, group, emission_time):
     safaty_time = passed_time - safaty_phase
     
     if region == 'RU':
-        if passed_time < 240:
+        if passed_time < 225:
             message = f'''
 <b>💥 Выброс начался!</b>
 
@@ -99,15 +99,15 @@ t.me/{group[1:]}
             message = f'''
 <b>💥 Выброс!</b>
 
-<b>Закончился: </b>{time_converter_ru(passed_time - 240)}
-{spawn_boost_mes if (passed_time-240)<60*30 else ''}
+<b>Закончился: </b>{time_converter_ru(passed_time - 225)}
+{spawn_boost_mes if (passed_time-225)<60*30 else ''}
 t.me/{group[1:]}
 '''
     
     
     
     else:
-        if passed_time < 240:
+        if passed_time < 225:
             message = f'''
 <b>💥 An Eruption occurred!</b>
 
@@ -122,8 +122,8 @@ t.me/{group[1:]}
             message = f'''
 <b>💥 Eruption!</b>
 
-<b>End time: </b>{time_converter_en(passed_time - 240)}
-{spawn_boost_mes if (passed_time-240)<60*30 else ''}
+<b>End time: </b>{time_converter_en(passed_time - 225)}
+{spawn_boost_mes if (passed_time-225)<60*30 else ''}
 t.me/{group[1:]}
 '''
     return message

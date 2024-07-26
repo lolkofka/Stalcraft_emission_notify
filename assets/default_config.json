@@ -1,12 +1,9 @@
 {
     "bot": {
-        "token": "",
+        "mongo": "",
         "database": "",
-        "managers": [
-            1234567890
-        ],
-        "debug": true,
-        "mongo": ""
+        "token": "",
+        "debug": true
     },
     "stalcraft_api": {
         "client_id": 123,

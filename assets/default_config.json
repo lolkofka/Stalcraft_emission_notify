@@ -1,12 +1,12 @@
 {
     "bot": {
-        "mongo": "",
-        "database": "",
-        "token": "",
+        "mongo": "mongodb://localhost:27017",
+        "database": "stalcraft_emissions",
+        "token": "bot token from https://t.me/BotFather",
         "debug": true
     },
     "stalcraft_api": {
         "client_id": 123,
-        "client_secret": "aboba"
+        "client_secret": "stalcraft_api_secret_key"
     }
 }

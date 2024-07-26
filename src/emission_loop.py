@@ -65,11 +65,11 @@ def time_converter_en(times):
     else:
         times = abs(times)
         if times < 60:
-            time_mes = f'after {pluralize_noun_en(times, "second")}'
+            time_mes = f'in {pluralize_noun_en(times, "second")}'
         elif times < 3600:
-            time_mes = f'after {pluralize_noun_en(times // 60, "minute")}'
+            time_mes = f'in {pluralize_noun_en(times // 60, "minute")}'
         else:
-            time_mes = f'after {pluralize_noun_en(times // 3600, "hour")}'
+            time_mes = f'in {pluralize_noun_en(times // 3600, "hour")}'
     return time_mes
 
 

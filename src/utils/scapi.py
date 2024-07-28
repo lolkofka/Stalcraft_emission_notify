@@ -39,7 +39,7 @@ class StalcraftAPI:
             params = f'?token={self.stalcraft_status_key}'
             endpoint += params
             r = await self.__request_get(endpoint, apiUrl=self.stalcraft_status_url)
-            return r.get('lastOnline')
+            return int(r.get('lastOnline'))
         except Exception as e:
             print(e)
             return 0

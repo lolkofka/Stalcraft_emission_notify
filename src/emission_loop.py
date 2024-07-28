@@ -135,7 +135,8 @@ async def start_loop(bot: aiogram.Bot):
     sc = StalcraftAPI(
         client_id=config['stalcraft_api']['client_id'],
         client_secret=config['stalcraft_api']['client_secret'],
-        debug=config['bot']['debug']
+        debug=config['bot']['debug'],
+        stalcraft_status_key=config['stalcraft_api']['stalcraft_status_key']
     )
     await sc.run()
     while True:
@@ -228,6 +229,8 @@ t.me/{groups.get(region)[1:]}
                     except TelegramBadRequest as e:
                         # print(e)
                         pass
-            await asyncio.sleep(5)
+                    except Exception as e:
+                        print(e)
+            await asyncio.sleep(8)
         except Exception as e:
             exception(e)

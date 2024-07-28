@@ -7,6 +7,13 @@
     },
     "stalcraft_api": {
         "client_id": 123,
-        "client_secret": "stalcraft_api_secret_key"
+        "client_secret": "stalcraft_api_secret_key",
+        "stalcraft_status_key": "https://stalcraft-status.ru/"
+    },
+    "groups": {
+        "NA": "@test",
+        "SEA": "@test",
+        "EU": "@test",
+        "RU": "@test"
     }
 }

@@ -3,8 +3,8 @@ from logging import exception
 import asyncio
 
 import aiogram
-from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import InputFile, FSInputFile
+from aiogram.exceptions import TelegramBadRequest, TelegramRetryAfter
+from aiogram.types import FSInputFile
 
 from utils.scapi import StalcraftAPI
 from config import config
@@ -14,12 +14,7 @@ import random
 import inflect
 import pymorphy3
 
-groups = {
-    'NA': '@stalcraftemissions_na',
-    'SEA': '@stalcraftemissions_sea',
-    'EU': '@stalcraftemissions_eu',
-    'RU': '@stalcraftvibrosi',
-}
+groups = config['groups']
 emission_end_time = 225
 
 
@@ -74,7 +69,7 @@ def time_converter_en(times):
     return time_mes
 
 #
-def make_message(region, group, emission_time):
+def make_message(region, group, emission_time, online):
     emission_time = int(emission_time)
     damage_phase = 120
     safaty_phase = emission_end_time
@@ -85,6 +80,7 @@ def make_message(region, group, emission_time):
     safaty_time = passed_time - safaty_phase
     
     if region == 'RU':
+        online = online if online > 0 else 'не установлен'
         if passed_time < emission_end_time:
             message = f'''
 <b>💥 Выброс начался!</b>
@@ -92,6 +88,7 @@ def make_message(region, group, emission_time):
 <b>Время начала: </b>{time_converter_ru(passed_time)}
 <b>Урон {"начнётся" if damage_time < 0 else 'начался'}: </b>{time_converter_ru(damage_time)}
 <b>Безопасно будет: </b>{time_converter_ru(safaty_time)}
+<b>Актуальный онлайн: </b>{online}
 
 t.me/{group[1:]}
             '''
@@ -101,6 +98,7 @@ t.me/{group[1:]}
 <b>💥 Выброс!</b>
 
 <b>Закончился: </b>{time_converter_ru(passed_time - emission_end_time)}
+<b>Актуальный онлайн: </b>{online}
 {spawn_boost_mes if (passed_time-emission_end_time)<60*30 else ''}
 t.me/{group[1:]}
 '''
@@ -108,6 +106,7 @@ t.me/{group[1:]}
     
     
     else:
+        online = online if online > 0 else 'not received'
         if passed_time < emission_end_time:
             message = f'''
 <b>💥 An Eruption occurred!</b>
@@ -115,6 +114,7 @@ t.me/{group[1:]}
 <b>Start time: </b>{time_converter_en(passed_time)}
 <b>Damage begins: </b>{time_converter_en(damage_time)}
 <b>Will be safe: </b>{time_converter_en(safaty_time)}
+<b>Current online: </b>{online}
 
 t.me/{group[1:]}
 '''
@@ -124,6 +124,7 @@ t.me/{group[1:]}
 <b>💥 Eruption!</b>
 
 <b>End time: </b>{time_converter_en(passed_time - emission_end_time)}
+<b>Current online: </b>{online}
 {spawn_boost_mes if (passed_time-emission_end_time)<60*30 else ''}
 t.me/{group[1:]}
 '''
@@ -133,7 +134,8 @@ t.me/{group[1:]}
 async def start_loop(bot: aiogram.Bot):
     sc = StalcraftAPI(
         client_id=config['stalcraft_api']['client_id'],
-        client_secret=config['stalcraft_api']['client_secret']
+        client_secret=config['stalcraft_api']['client_secret'],
+        debug=config['bot']['debug']
     )
     await sc.run()
     while True:
@@ -142,7 +144,10 @@ async def start_loop(bot: aiogram.Bot):
                 emiss = await sc.get_emission(region)
                 if 'currentStart' in emiss:
                     actual_emiss = await Emission.find_one(Emission.emission_time == emiss.get('currentStart'))
-                    dt = datetime.strptime(emiss.get('currentStart'), "%Y-%m-%dT%H:%M:%SZ")
+                    dt = datetime.strptime(
+                        emiss.get('currentStart'),
+                        "%Y-%m-%dT%H:%M:%SZ" if not config['bot']['debug'] else '%Y-%m-%dT%H:%M:%S.%fZ'
+                    )
                     dt = dt.replace(tzinfo=timezone.utc)
                     emiss_timestamp = int(dt.timestamp())
                     # emiss_timestamp = int(datetime.now(timezone.utc).timestamp())
@@ -151,11 +156,16 @@ async def start_loop(bot: aiogram.Bot):
                         print(f'Emission start, region: {region}, time: {emiss.get("currentStart")} ')
                         image = f'assets/images/emm{random.randint(1, 5)}.png'
                         photo = FSInputFile(image)
-                        msg = await bot.send_photo(
-                            chat_id=groups.get(region),
-                            photo=photo,
-                            caption=make_message(region, groups.get(region), emiss_timestamp)
-                        )
+                        try:
+                            msg = await bot.send_photo(
+                                chat_id=groups.get(region),
+                                photo=photo,
+                                caption=make_message(region, groups.get(region), emiss_timestamp, await sc.get_stalcraft_online())
+                            )
+                        except TelegramRetryAfter as e:
+                            print('Ошибка, попробуйте позже')
+                        except Exception as e:
+                            print(str(e))
                         last_emis = await Emission.find(
                             Emission.region == region
                         ).sort(-Emission.emission_time).first_or_none()
@@ -167,12 +177,14 @@ async def start_loop(bot: aiogram.Bot):
                             dt_msk = dt_utc + msk_offset
                             formatted_time_utc = dt_utc.strftime("%H:%M")
                             formatted_time_msk = dt_msk.strftime("%H:%M")
+                            online = await sc.get_stalcraft_online()
                             
                             if region == 'RU':
                                 msg_text = f'''
 <b>💥 Выброс!</b>
 
 <b>Время начала: </b>{formatted_time_msk} (МСК)
+<b>Онлайн на момент конца выброса: </b> {online}
 
 t.me/{groups.get(region)[1:]}
 '''
@@ -181,6 +193,7 @@ t.me/{groups.get(region)[1:]}
 <b>💥 Eruption!</b>
 
 <b>Start time: </b>{formatted_time_utc} (UTC)
+<b>Online at the time of the end of the emission: </b> {online}
 
 t.me/{groups.get(region)[1:]}
 '''
@@ -189,6 +202,10 @@ t.me/{groups.get(region)[1:]}
                                                                message_id=last_emis.message_id)
                             except TelegramBadRequest as e:
                                 pass
+                            except TelegramRetryAfter as e:
+                                print('Ошибка, попробуйте позже '+ e)
+                            except Exception as e:
+                                print('Критическая ошибка: '+str(e))
                             
                         emi_db = Emission(
                             region=region,
@@ -204,7 +221,7 @@ t.me/{groups.get(region)[1:]}
                     Emission.region == region
                 ).sort(-Emission.emission_time).first_or_none()
                 if last_emis:
-                    msg_text = make_message(region, groups.get(region), last_emis.emission_timestamp)
+                    msg_text = make_message(region, groups.get(region), last_emis.emission_timestamp, await sc.get_stalcraft_online())
                     try:
                         await bot.edit_message_caption(caption=msg_text, chat_id=last_emis.group,
                                                        message_id=last_emis.message_id)

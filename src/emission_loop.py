@@ -178,14 +178,14 @@ async def start_loop(bot: aiogram.Bot):
                             dt_msk = dt_utc + msk_offset
                             formatted_time_utc = dt_utc.strftime("%H:%M")
                             formatted_time_msk = dt_msk.strftime("%H:%M")
-                            online = await sc.get_stalcraft_online()
+                            online_text = last_emis.last_online
                             
                             if region == 'RU':
                                 msg_text = f'''
 <b>💥 Выброс!</b>
 
 <b>Время начала: </b>{formatted_time_msk} (МСК)
-<b>Онлайн на момент конца выброса: </b> {online}
+<b>Игроков онлайн: </b>{online_text if online_text>0 else 'не установлен'}
 
 t.me/{groups.get(region)[1:]}
 '''
@@ -194,7 +194,7 @@ t.me/{groups.get(region)[1:]}
 <b>💥 Eruption!</b>
 
 <b>Start time: </b>{formatted_time_utc} (UTC)
-<b>Online at the time of the end of the emission: </b> {online}
+<b>Players online: </b>{online_text if online_text>0 else 'not received'}
 
 t.me/{groups.get(region)[1:]}
 '''
@@ -207,13 +207,16 @@ t.me/{groups.get(region)[1:]}
                                 print('Ошибка, попробуйте позже '+ e)
                             except Exception as e:
                                 print('Критическая ошибка: '+str(e))
-                            
+                                
+                        online = await sc.get_stalcraft_online()
+
                         emi_db = Emission(
                             region=region,
                             emission_time=emiss.get('currentStart'),
                             emission_timestamp=emiss_timestamp,
                             message_id=msg.message_id,
-                            group=groups.get(region)
+                            group=groups.get(region),
+                            last_online=online
                         )
                         await emi_db.insert()
                         continue

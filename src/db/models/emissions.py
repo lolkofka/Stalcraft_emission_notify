@@ -10,6 +10,7 @@ class Emission(Document):
     emission_timestamp: int
     message_id: int
     group: str
+    last_online: int = 0
 
     def __init__(self, **kwargs) -> None:
         super(Document, self).__init__(**kwargs)

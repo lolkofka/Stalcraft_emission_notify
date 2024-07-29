@@ -93,13 +93,13 @@ def make_message(region, group, emission_time, online):
 t.me/{group[1:]}
             '''
         else:
-            spawn_boost_mes = f'<b>Спавн артефактов повышен</b>\n'
+            spawn_boost_mes = f'\n<b>Спавн артефактов повышен</b>\n'
             message = f'''
 <b>💥 Выброс!</b>
 
-<b>Закончился: </b>{time_converter_ru(passed_time - emission_end_time)}
+<b>Закончился: </b>{time_converter_ru(passed_time - emission_end_time)}{spawn_boost_mes if (passed_time-emission_end_time)<60*30 else ''}
 <b>Актуальный онлайн: </b>{online}
-{spawn_boost_mes if (passed_time-emission_end_time)<60*30 else ''}
+
 t.me/{group[1:]}
 '''
     
@@ -119,13 +119,13 @@ t.me/{group[1:]}
 t.me/{group[1:]}
 '''
         else:
-            spawn_boost_mes = f'<b>Artifacts Spawn Boosted</b>\n'
+            spawn_boost_mes = f'\n<b>Artifacts Spawn Boosted</b>\n'
             message = f'''
 <b>💥 Eruption!</b>
 
-<b>End time: </b>{time_converter_en(passed_time - emission_end_time)}
+<b>End time: </b>{time_converter_en(passed_time - emission_end_time)}{spawn_boost_mes if (passed_time-emission_end_time)<60*30 else ''}
 <b>Current online: </b>{online}
-{spawn_boost_mes if (passed_time-emission_end_time)<60*30 else ''}
+
 t.me/{group[1:]}
 '''
     return message

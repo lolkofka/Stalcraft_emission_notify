@@ -234,6 +234,6 @@ t.me/{groups.get(region)[1:]}
                         pass
                     except Exception as e:
                         print(e)
-            await asyncio.sleep(8)
+            await asyncio.sleep(config['bot']['update_time_sec'])
         except Exception as e:
             exception(e)

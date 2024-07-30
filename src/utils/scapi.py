@@ -36,7 +36,7 @@ class StalcraftAPI:
             return 0
         try:
             endpoint = 'api/v1/last'
-            params = f'?token={self.stalcraft_status_key}'
+            params = f'?token={self.stalcraft_status_key}&v=2'
             endpoint += params
             r = await self.__request_get(endpoint, apiUrl=self.stalcraft_status_url)
             return int(r.get('lastOnline'))
